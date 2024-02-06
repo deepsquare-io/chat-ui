@@ -1,14 +1,14 @@
+import { env } from "$env/dynamic/private";
 import type { Message } from "$lib/types/Message";
 import { format } from "date-fns";
-import { generateFromDefaultEndpoint } from "../generateFromDefaultEndpoint";
-import { WEBSEARCH_ALLOWLIST, WEBSEARCH_BLOCKLIST } from "$env/static/private";
-import { z } from "zod";
 import JSON5 from "json5";
+import { z } from "zod";
+import { generateFromDefaultEndpoint } from "../generateFromDefaultEndpoint";
 
 const listSchema = z.array(z.string()).default([]);
 
-const allowList = listSchema.parse(JSON5.parse(WEBSEARCH_ALLOWLIST));
-const blockList = listSchema.parse(JSON5.parse(WEBSEARCH_BLOCKLIST));
+const allowList = listSchema.parse(JSON5.parse(env.WEBSEARCH_ALLOWLIST));
+const blockList = listSchema.parse(JSON5.parse(env.WEBSEARCH_BLOCKLIST));
 
 const queryModifier = [
 	...allowList.map((item) => "site:" + item),
@@ -37,7 +37,7 @@ Current Question: What about Mexico?
 		},
 		{
 			from: "user",
-			content: `Previous questions: 
+			content: `Previous questions:
 - When is the next formula 1 grand prix?
 
 Current Question: Where is it being hosted?`,

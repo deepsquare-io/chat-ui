@@ -1,27 +1,22 @@
 <script lang="ts">
-	import { onDestroy } from "svelte";
 	import { goto, invalidate } from "$app/navigation";
-	import { page } from "$app/stores";
-	import "../styles/main.css";
 	import { base } from "$app/paths";
-	import {
-		PUBLIC_APP_DESCRIPTION,
-		PUBLIC_ORIGIN,
-		PUBLIC_PLAUSIBLE_SCRIPT_URL,
-	} from "$env/static/public";
+	import { page } from "$app/stores";
+	import { env } from "$env/dynamic/public";
+	import { onDestroy } from "svelte";
+	import "../styles/main.css";
 
 	import { shareConversation } from "$lib/shareConversation";
-	import { UrlDependency } from "$lib/types/UrlDependency";
 	import { error } from "$lib/stores/errors";
+	import { UrlDependency } from "$lib/types/UrlDependency";
 
+	import { browser } from "$app/environment";
+	import DisclaimerModal from "$lib/components/DisclaimerModal.svelte";
 	import MobileNav from "$lib/components/MobileNav.svelte";
 	import NavMenu from "$lib/components/NavMenu.svelte";
 	import Toast from "$lib/components/Toast.svelte";
-	import { PUBLIC_APP_ASSETS, PUBLIC_APP_NAME } from "$env/static/public";
-	import titleUpdate from "$lib/stores/titleUpdate";
 	import { createSettingsStore } from "$lib/stores/settings";
-	import { browser } from "$app/environment";
-	import DisclaimerModal from "$lib/components/DisclaimerModal.svelte";
+	import titleUpdate from "$lib/stores/titleUpdate";
 
 	export let data;
 
@@ -121,7 +116,7 @@
 </script>
 
 <svelte:head>
-	<title>{PUBLIC_APP_NAME}</title>
+	<title>{env.PUBLIC_APP_NAME}</title>
 	<meta name="description" content="The first open source alternative to ChatGPT. 💪" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:site" content="@huggingface" />
@@ -129,39 +124,39 @@
 	<!-- use those meta tags everywhere except on the share assistant page -->
 	<!-- feel free to refacto if there's a better way -->
 	{#if !$page.url.pathname.includes("/assistant/") && $page.route.id !== "/assistants"}
-		<meta property="og:title" content={PUBLIC_APP_NAME} />
+		<meta property="og:title" content={env.PUBLIC_APP_NAME} />
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="{PUBLIC_ORIGIN || $page.url.origin}{base}" />
+		<meta property="og:url" content="{env.PUBLIC_ORIGIN || $page.url.origin}{base}" />
 		<meta
 			property="og:image"
-			content="{PUBLIC_ORIGIN || $page.url.origin}{base}/{PUBLIC_APP_ASSETS}/thumbnail.png"
+			content="{env.PUBLIC_ORIGIN || $page.url.origin}{base}/{env.PUBLIC_APP_ASSETS}/thumbnail.png"
 		/>
-		<meta property="og:description" content={PUBLIC_APP_DESCRIPTION} />
+		<meta property="og:description" content={env.PUBLIC_APP_DESCRIPTION} />
 	{/if}
 	<link
 		rel="icon"
-		href="{PUBLIC_ORIGIN || $page.url.origin}{base}/{PUBLIC_APP_ASSETS}/favicon.ico"
+		href="{env.PUBLIC_ORIGIN || $page.url.origin}{base}/{env.PUBLIC_APP_ASSETS}/favicon.ico"
 		sizes="32x32"
 	/>
 	<link
 		rel="icon"
-		href="{PUBLIC_ORIGIN || $page.url.origin}{base}/{PUBLIC_APP_ASSETS}/icon.svg"
+		href="{env.PUBLIC_ORIGIN || $page.url.origin}{base}/{env.PUBLIC_APP_ASSETS}/icon.svg"
 		type="image/svg+xml"
 	/>
 	<link
 		rel="apple-touch-icon"
-		href="{PUBLIC_ORIGIN || $page.url.origin}{base}/{PUBLIC_APP_ASSETS}/apple-touch-icon.png"
+		href="{env.PUBLIC_ORIGIN || $page.url.origin}{base}/{env.PUBLIC_APP_ASSETS}/apple-touch-icon.png"
 	/>
 	<link
 		rel="manifest"
-		href="{PUBLIC_ORIGIN || $page.url.origin}{base}/{PUBLIC_APP_ASSETS}/manifest.json"
+		href="{env.PUBLIC_ORIGIN || $page.url.origin}{base}/{env.PUBLIC_APP_ASSETS}/manifest.json"
 	/>
 
-	{#if PUBLIC_PLAUSIBLE_SCRIPT_URL}
+	{#if env.PUBLIC_PLAUSIBLE_SCRIPT_URL}
 		<script
 			defer
-			data-domain={new URL(PUBLIC_ORIGIN).hostname}
-			src={PUBLIC_PLAUSIBLE_SCRIPT_URL}
+			data-domain={new URL(env.PUBLIC_ORIGIN).hostname}
+			src={env.PUBLIC_PLAUSIBLE_SCRIPT_URL}
 		></script>
 	{/if}
 </svelte:head>

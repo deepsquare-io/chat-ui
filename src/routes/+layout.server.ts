@@ -1,21 +1,13 @@
-import type { LayoutServerLoad } from "./$types";
-import { collections } from "$lib/server/database";
-import type { Conversation } from "$lib/types/Conversation";
-import { UrlDependency } from "$lib/types/UrlDependency";
-import { defaultModel, models, oldModels, validateModel } from "$lib/server/models";
+import { env } from "$env/dynamic/private";
 import { authCondition, requiresUser } from "$lib/server/auth";
-import { DEFAULT_SETTINGS } from "$lib/types/Settings";
-import {
-	SERPAPI_KEY,
-	SERPER_API_KEY,
-	SERPSTACK_API_KEY,
-	MESSAGES_BEFORE_LOGIN,
-	YDC_API_KEY,
-	USE_LOCAL_WEBSEARCH,
-	ENABLE_ASSISTANTS,
-} from "$env/static/private";
-import { ObjectId } from "mongodb";
+import { collections } from "$lib/server/database";
+import { defaultModel, models, oldModels, validateModel } from "$lib/server/models";
 import type { ConvSidebar } from "$lib/types/ConvSidebar";
+import type { Conversation } from "$lib/types/Conversation";
+import { DEFAULT_SETTINGS } from "$lib/types/Settings";
+import { UrlDependency } from "$lib/types/UrlDependency";
+import { ObjectId } from "mongodb";
+import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async ({ locals, depends }) => {
 	depends(UrlDependency.ConversationList);
@@ -59,13 +51,13 @@ export const load: LayoutServerLoad = async ({ locals, depends }) => {
 				.toArray()
 		)[0]?.messages ?? 0;
 
-	const messagesBeforeLogin = MESSAGES_BEFORE_LOGIN ? parseInt(MESSAGES_BEFORE_LOGIN) : 0;
+	const messagesBeforeLogin = env.MESSAGES_BEFORE_LOGIN ? parseInt(env.MESSAGES_BEFORE_LOGIN) : 0;
 
 	const userHasExceededMessages = messagesBeforeLogin > 0 && totalMessages > messagesBeforeLogin;
 
 	const loginRequired = requiresUser && !locals.user && userHasExceededMessages;
 
-	const enableAssistants = ENABLE_ASSISTANTS === "true";
+	const enableAssistants = env.ENABLE_ASSISTANTS === "true";
 
 	const assistantActive = !models.map(({ id }) => id).includes(settings?.activeModel ?? "");
 
@@ -122,11 +114,11 @@ export const load: LayoutServerLoad = async ({ locals, depends }) => {
 		}) satisfies ConvSidebar[],
 		settings: {
 			searchEnabled: !!(
-				SERPAPI_KEY ||
-				SERPER_API_KEY ||
-				SERPSTACK_API_KEY ||
-				YDC_API_KEY ||
-				USE_LOCAL_WEBSEARCH
+				env.SERPAPI_KEY ||
+				env.SERPER_API_KEY ||
+				env.SERPSTACK_API_KEY ||
+				env.YDC_API_KEY ||
+				env.USE_LOCAL_WEBSEARCH
 			),
 			ethicsModalAccepted: !!settings?.ethicsModalAcceptedAt,
 			ethicsModalAcceptedAt: settings?.ethicsModalAcceptedAt ?? null,

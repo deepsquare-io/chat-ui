@@ -1,17 +1,17 @@
-import { z } from "zod";
-import { openAICompletionToTextGenerationStream } from "./openAICompletionToTextGenerationStream";
-import { openAIChatToTextGenerationStream } from "./openAIChatToTextGenerationStream";
+import { env } from "$env/dynamic/private";
 import { buildPrompt } from "$lib/buildPrompt";
-import { OPENAI_API_KEY } from "$env/static/private";
-import type { Endpoint } from "../endpoints";
 import { format } from "date-fns";
+import { z } from "zod";
+import type { Endpoint } from "../endpoints";
+import { openAIChatToTextGenerationStream } from "./openAIChatToTextGenerationStream";
+import { openAICompletionToTextGenerationStream } from "./openAICompletionToTextGenerationStream";
 
 export const endpointOAIParametersSchema = z.object({
 	weight: z.number().int().positive().default(1),
 	model: z.any(),
 	type: z.literal("openai"),
 	baseURL: z.string().url().default("https://api.openai.com/v1"),
-	apiKey: z.string().default(OPENAI_API_KEY ?? "sk-"),
+	apiKey: z.string().default(env.OPENAI_API_KEY ?? "sk-"),
 	completion: z
 		.union([z.literal("completions"), z.literal("chat_completions")])
 		.default("chat_completions"),
@@ -82,7 +82,7 @@ export async function endpointOai(
 						${webSearch.context}
 						=====================
 						${previousQuestions}
-						Answer the question: ${lastMsg.content} 
+						Answer the question: ${lastMsg.content}
 						`,
 					},
 				];

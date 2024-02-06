@@ -1,28 +1,28 @@
-import { MONGODB_URL, MONGODB_DB_NAME, MONGODB_DIRECT_CONNECTION } from "$env/static/private";
-import { GridFSBucket, MongoClient } from "mongodb";
-import type { Conversation } from "$lib/types/Conversation";
-import type { SharedConversation } from "$lib/types/SharedConversation";
+import { env } from "$env/dynamic/private";
 import type { AbortedGeneration } from "$lib/types/AbortedGeneration";
-import type { Settings } from "$lib/types/Settings";
-import type { User } from "$lib/types/User";
-import type { MessageEvent } from "$lib/types/MessageEvent";
-import type { Session } from "$lib/types/Session";
 import type { Assistant } from "$lib/types/Assistant";
+import type { Conversation } from "$lib/types/Conversation";
+import type { MessageEvent } from "$lib/types/MessageEvent";
 import type { Report } from "$lib/types/Report";
+import type { Session } from "$lib/types/Session";
+import type { Settings } from "$lib/types/Settings";
+import type { SharedConversation } from "$lib/types/SharedConversation";
+import type { User } from "$lib/types/User";
+import { GridFSBucket, MongoClient } from "mongodb";
 
-if (!MONGODB_URL) {
+if (!env.MONGODB_URL) {
 	throw new Error(
 		"Please specify the MONGODB_URL environment variable inside .env.local. Set it to mongodb://localhost:27017 if you are running MongoDB locally, or to a MongoDB Atlas free instance for example."
 	);
 }
 
-const client = new MongoClient(MONGODB_URL, {
-	directConnection: MONGODB_DIRECT_CONNECTION === "true",
+const client = new MongoClient(env.MONGODB_URL, {
+	directConnection: env.MONGODB_DIRECT_CONNECTION === "true",
 });
 
 export const connectPromise = client.connect().catch(console.error);
 
-const db = client.db(MONGODB_DB_NAME + (import.meta.env.MODE === "test" ? "-test" : ""));
+const db = client.db(env.MONGODB_DB_NAME + (import.meta.env.MODE === "test" ? "-test" : ""));
 
 const conversations = db.collection<Conversation>("conversations");
 const assistants = db.collection<Assistant>("assistants");

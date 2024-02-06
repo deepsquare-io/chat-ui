@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { base } from "$app/paths";
-
-	import Logo from "$lib/components/icons/Logo.svelte";
-	import { switchTheme } from "$lib/switchTheme";
-	import { isAborted } from "$lib/stores/isAborted";
-	import { PUBLIC_APP_NAME, PUBLIC_ORIGIN } from "$env/static/public";
-	import NavConversationItem from "./NavConversationItem.svelte";
-	import type { LayoutData } from "../../routes/$types";
-	import type { ConvSidebar } from "$lib/types/ConvSidebar";
 	import { page } from "$app/stores";
+	import { env } from "$env/dynamic/public";
+	import Logo from "$lib/components/icons/Logo.svelte";
+	import { isAborted } from "$lib/stores/isAborted";
+	import { switchTheme } from "$lib/switchTheme";
+	import type { ConvSidebar } from "$lib/types/ConvSidebar";
+	import type { LayoutData } from "../../routes/$types";
+	import NavConversationItem from "./NavConversationItem.svelte";
 
 	export let conversations: ConvSidebar[] = [];
 	export let canLogin: boolean;
@@ -44,9 +43,9 @@
 </script>
 
 <div class="sticky top-0 flex flex-none items-center justify-between px-3 py-3.5 max-sm:pt-0">
-	<a class="flex items-center rounded-xl text-lg font-semibold" href="{PUBLIC_ORIGIN}{base}/">
+	<a class="flex items-center rounded-xl text-lg font-semibold" href="{env.PUBLIC_ORIGIN}{base}/">
 		<Logo classNames="mr-1" />
-		{PUBLIC_APP_NAME}
+		{env.PUBLIC_APP_NAME}
 	</a>
 	<a
 		href={`${base}/`}
@@ -127,7 +126,7 @@
 	>
 		Settings
 	</a>
-	{#if PUBLIC_APP_NAME === "HuggingChat"}
+	{#if env.PUBLIC_APP_NAME === "HuggingChat"}
 		<a
 			href="{base}/privacy"
 			class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"

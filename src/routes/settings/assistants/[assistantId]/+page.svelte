@@ -2,16 +2,16 @@
 	import { enhance } from "$app/forms";
 	import { base } from "$app/paths";
 	import { page } from "$app/stores";
-	import { PUBLIC_ORIGIN, PUBLIC_SHARE_PREFIX } from "$env/static/public";
+	import { env } from "$env/dynamic/public";
 	import { useSettingsStore } from "$lib/stores/settings";
 	import type { PageData } from "./$types";
 
-	import CarbonPen from "~icons/carbon/pen";
-	import CarbonTrash from "~icons/carbon/trash-can";
+	import CopyToClipBoardBtn from "$lib/components/CopyToClipBoardBtn.svelte";
 	import CarbonCopy from "~icons/carbon/copy-file";
 	import CarbonFlag from "~icons/carbon/flag";
 	import CarbonLink from "~icons/carbon/link";
-	import CopyToClipBoardBtn from "$lib/components/CopyToClipBoardBtn.svelte";
+	import CarbonPen from "~icons/carbon/pen";
+	import CarbonTrash from "~icons/carbon/trash-can";
 
 	export let data: PageData;
 
@@ -21,7 +21,7 @@
 
 	$: isActive = $settings.activeModel === $page.params.assistantId;
 
-	const prefix = PUBLIC_SHARE_PREFIX || `${PUBLIC_ORIGIN || $page.url.origin}${base}`;
+	const prefix = env.PUBLIC_SHARE_PREFIX || `${env.PUBLIC_ORIGIN || $page.url.origin}${base}`;
 
 	$: shareUrl = `${prefix}/assistant/${assistant?._id}`;
 </script>

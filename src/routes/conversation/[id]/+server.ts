@@ -1,19 +1,19 @@
-import { MESSAGES_BEFORE_LOGIN, RATE_LIMIT } from "$env/static/private";
+import { env } from "$env/dynamic/private";
+import { abortedGenerations } from "$lib/server/abortedGenerations";
 import { authCondition, requiresUser } from "$lib/server/auth";
 import { collections } from "$lib/server/database";
+import { uploadFile } from "$lib/server/files/uploadFile";
 import { models } from "$lib/server/models";
+import { summarize } from "$lib/server/summarize";
+import { runWebSearch } from "$lib/server/websearch/runWebSearch";
 import { ERROR_MESSAGES } from "$lib/stores/errors";
 import type { Message } from "$lib/types/Message";
+import type { MessageUpdate } from "$lib/types/MessageUpdate";
+import type { WebSearch } from "$lib/types/WebSearch";
 import { error } from "@sveltejs/kit";
+import sizeof from "image-size";
 import { ObjectId } from "mongodb";
 import { z } from "zod";
-import type { MessageUpdate } from "$lib/types/MessageUpdate";
-import { runWebSearch } from "$lib/server/websearch/runWebSearch";
-import type { WebSearch } from "$lib/types/WebSearch";
-import { abortedGenerations } from "$lib/server/abortedGenerations";
-import { summarize } from "$lib/server/summarize";
-import { uploadFile } from "$lib/server/files/uploadFile";
-import sizeof from "image-size";
 
 export async function POST({ request, locals, params, getClientAddress }) {
 	const id = z.string().parse(params.id);
@@ -48,7 +48,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 	if (
 		!locals.user?._id &&
 		requiresUser &&
-		(MESSAGES_BEFORE_LOGIN ? parseInt(MESSAGES_BEFORE_LOGIN) : 0) > 0
+		(env.MESSAGES_BEFORE_LOGIN ? parseInt(env.MESSAGES_BEFORE_LOGIN) : 0) > 0
 	) {
 		const totalMessages =
 			(
@@ -63,7 +63,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 					.toArray()
 			)[0]?.messages ?? 0;
 
-		if (totalMessages > parseInt(MESSAGES_BEFORE_LOGIN)) {
+		if (totalMessages > parseInt(env.MESSAGES_BEFORE_LOGIN)) {
 			throw error(429, "Exceeded number of messages before login");
 		}
 	}
@@ -74,7 +74,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 		await collections.messageEvents.countDocuments({ ip: getClientAddress() })
 	);
 
-	if (RATE_LIMIT != "" && nEvents > parseInt(RATE_LIMIT)) {
+	if (env.RATE_LIMIT != "" && nEvents > parseInt(env.RATE_LIMIT)) {
 		throw error(429, ERROR_MESSAGES.rateLimited);
 	}
 

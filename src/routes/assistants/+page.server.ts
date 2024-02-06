@@ -1,5 +1,5 @@
 import { base } from "$app/paths";
-import { ENABLE_ASSISTANTS } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import { collections } from "$lib/server/database.js";
 import type { Assistant } from "$lib/types/Assistant";
 import { redirect } from "@sveltejs/kit";
@@ -8,7 +8,7 @@ import type { Filter } from "mongodb";
 const NUM_PER_PAGE = 24;
 
 export const load = async ({ url }) => {
-	if (!ENABLE_ASSISTANTS) {
+	if (!env.ENABLE_ASSISTANTS) {
 		throw redirect(302, `${base}/`);
 	}
 

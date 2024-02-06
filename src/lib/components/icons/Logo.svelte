@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { page } from "$app/stores";
-	import { PUBLIC_APP_ASSETS, PUBLIC_APP_NAME, PUBLIC_ORIGIN } from "$env/static/public";
 	import { base } from "$app/paths";
+	import { page } from "$app/stores";
+	import { env } from "$env/dynamic/public";
 
 	export let classNames = "";
 </script>
 
-{#if PUBLIC_APP_ASSETS === "chatui"}
+{#if env.PUBLIC_APP_ASSETS === "chatui"}
 	<svg
 		height="30"
 		width="30"
@@ -22,7 +22,7 @@
 {:else}
 	<object
 		class={classNames}
-		data="{PUBLIC_ORIGIN || $page.url.origin}{base}/{PUBLIC_APP_ASSETS}/logo.svg"
-		title="{PUBLIC_APP_NAME} logo"
+		data="{env.PUBLIC_ORIGIN || $page.url.origin}{base}/{env.PUBLIC_APP_ASSETS}/logo.svg"
+		title="{env.PUBLIC_APP_NAME} logo"
 	/>
 {/if}

@@ -2,16 +2,16 @@
 	import { createEventDispatcher } from "svelte";
 
 	import Modal from "$lib/components/Modal.svelte";
+	import CarbonArrowUpRight from "~icons/carbon/arrow-up-right";
 	import CarbonClose from "~icons/carbon/close";
 	import CarbonTrashCan from "~icons/carbon/trash-can";
-	import CarbonArrowUpRight from "~icons/carbon/arrow-up-right";
 
 	import { enhance } from "$app/forms";
 	import { base } from "$app/paths";
 
-	import { useSettingsStore } from "$lib/stores/settings";
+	import { env } from "$env/dynamic/public";
 	import Switch from "$lib/components/Switch.svelte";
-	import { PUBLIC_APP_DATA_SHARING } from "$env/static/public";
+	import { useSettingsStore } from "$lib/stores/settings";
 
 	let isConfirmingDeletion = false;
 
@@ -26,7 +26,7 @@
 	</div>
 
 	<div class="flex h-full flex-col gap-4 pt-4 max-sm:pt-0">
-		{#if PUBLIC_APP_DATA_SHARING === "1"}
+		{#if env.PUBLIC_APP_DATA_SHARING === "1"}
 			<!-- svelte-ignore a11y-label-has-associated-control -->
 			<label class="flex items-center">
 				<Switch

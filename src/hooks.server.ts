@@ -1,19 +1,15 @@
-import { COOKIE_NAME, EXPOSE_API, MESSAGES_BEFORE_LOGIN } from "$env/static/private";
-import type { Handle } from "@sveltejs/kit";
-import {
-	PUBLIC_GOOGLE_ANALYTICS_ID,
-	PUBLIC_ORIGIN,
-	PUBLIC_APP_DISCLAIMER,
-} from "$env/static/public";
-import { collections } from "$lib/server/database";
 import { base } from "$app/paths";
+import { env } from "$env/dynamic/private";
+import { env as publicEnv } from "$env/dynamic/public";
 import { findUser, refreshSessionCookie, requiresUser } from "$lib/server/auth";
+import { collections } from "$lib/server/database";
 import { ERROR_MESSAGES } from "$lib/stores/errors";
 import { sha256 } from "$lib/utils/sha256";
+import type { Handle } from "@sveltejs/kit";
 import { addWeeks } from "date-fns";
 
 export const handle: Handle = async ({ event, resolve }) => {
-	if (event.url.pathname.startsWith(`${base}/api/`) && EXPOSE_API !== "true") {
+	if (event.url.pathname.startsWith(`${base}/api/`) && env.EXPOSE_API !== "true") {
 		return new Response("API is disabled", { status: 403 });
 	}
 
@@ -29,7 +25,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		});
 	}
 
-	const token = event.cookies.get(COOKIE_NAME);
+	const token = event.cookies.get(env.COOKIE_NAME);
 
 	let secretSessionId: string;
 	let sessionId: string;
@@ -76,7 +72,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 			const validOrigins = [
 				new URL(event.request.url).origin,
-				...(PUBLIC_ORIGIN ? [new URL(PUBLIC_ORIGIN).origin] : []),
+				...(publicEnv.PUBLIC_ORIGIN ? [new URL(publicEnv.PUBLIC_ORIGIN).origin] : []),
 			];
 
 			if (!validOrigins.includes(new URL(referer).origin)) {
@@ -103,7 +99,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		if (
 			!event.locals.user &&
 			requiresUser &&
-			!((MESSAGES_BEFORE_LOGIN ? parseInt(MESSAGES_BEFORE_LOGIN) : 0) > 0)
+			!((env.MESSAGES_BEFORE_LOGIN ? parseInt(env.MESSAGES_BEFORE_LOGIN) : 0) > 0)
 		) {
 			return errorResponse(401, ERROR_MESSAGES.authOnly);
 		}
@@ -114,7 +110,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		if (
 			!requiresUser &&
 			!event.url.pathname.startsWith(`${base}/settings`) &&
-			!!PUBLIC_APP_DISCLAIMER
+			!!publicEnv.PUBLIC_APP_DISCLAIMER
 		) {
 			const hasAcceptedEthicsModal = await collections.settings.countDocuments({
 				sessionId: event.locals.sessionId,
@@ -137,7 +133,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			}
 			replaced = true;
 
-			return chunk.html.replace("%gaId%", PUBLIC_GOOGLE_ANALYTICS_ID);
+			return chunk.html.replace("%gaId%", publicEnv.PUBLIC_GOOGLE_ANALYTICS_ID);
 		},
 	});
 
