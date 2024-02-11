@@ -1,6 +1,6 @@
 import { base } from "$app/paths";
 import { env } from "$env/dynamic/private";
-import { publicEnv } from "$env/dynamic/public";
+import { env as publicEnv } from "$env/dynamic/public";
 import { authCondition } from "$lib/server/auth";
 import { collections } from "$lib/server/database";
 import { fail, redirect, type Actions } from "@sveltejs/kit";
