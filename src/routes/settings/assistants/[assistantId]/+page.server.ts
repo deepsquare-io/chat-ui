@@ -1,10 +1,10 @@
-import { collections } from "$lib/server/database";
-import { type Actions, fail, redirect } from "@sveltejs/kit";
-import { ObjectId } from "mongodb";
-import { authCondition } from "$lib/server/auth";
 import { base } from "$app/paths";
-import { PUBLIC_ORIGIN, PUBLIC_SHARE_PREFIX } from "$env/static/public";
-import { WEBHOOK_URL_REPORT_ASSISTANT } from "$env/static/private";
+import { env } from "$env/dynamic/private";
+import { publicEnv } from "$env/dynamic/public";
+import { authCondition } from "$lib/server/auth";
+import { collections } from "$lib/server/database";
+import { fail, redirect, type Actions } from "@sveltejs/kit";
+import { ObjectId } from "mongodb";
 
 async function assistantOnlyIfAuthor(locals: App.Locals, assistantId?: string) {
 	const assistant = await collections.assistants.findOne({ _id: new ObjectId(assistantId) });
@@ -76,8 +76,9 @@ export const actions: Actions = {
 			return fail(500, { error: true, message: "Failed to report assistant" });
 		}
 
-		if (WEBHOOK_URL_REPORT_ASSISTANT) {
-			const prefixUrl = PUBLIC_SHARE_PREFIX || `${PUBLIC_ORIGIN || url.origin}${base}`;
+		if (env.WEBHOOK_URL_REPORT_ASSISTANT) {
+			const prefixUrl =
+				publicEnv.PUBLIC_SHARE_PREFIX || `${publicEnv.PUBLIC_ORIGIN || url.origin}${base}`;
 			const assistantUrl = `${prefixUrl}/assistant/${params.assistantId}`;
 
 			const assistant = await collections.assistants.findOne(
@@ -85,7 +86,7 @@ export const actions: Actions = {
 				{ projection: { name: 1 } }
 			);
 
-			const res = await fetch(WEBHOOK_URL_REPORT_ASSISTANT, {
+			const res = await fetch(env.WEBHOOK_URL_REPORT_ASSISTANT, {
 				method: "POST",
 				headers: {
 					"Content-type": "application/json",
