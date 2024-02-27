@@ -3,17 +3,27 @@ import type { GoogleParameters } from "serpapi";
 import { getJson } from "serpapi";
 import type { YouWebSearch } from "../../types/WebSearch";
 import { WebSearchProvider } from "../../types/WebSearch";
+import { searchSearxng } from "./searchSearxng";
 import { searchWebLocal } from "./searchWebLocal";
 
 // get which SERP api is providing web results
 export function getWebSearchProvider() {
-	return env.YDC_API_KEY ? WebSearchProvider.YOU : WebSearchProvider.GOOGLE;
+	if (env.YDC_API_KEY) {
+		return WebSearchProvider.YOU;
+	} else if (env.SEARXNG_QUERY_URL) {
+		return WebSearchProvider.SEARXNG;
+	} else {
+		return WebSearchProvider.GOOGLE;
+	}
 }
 
 // Show result as JSON
 export async function searchWeb(query: string) {
 	if (env.USE_LOCAL_WEBSEARCH) {
 		return await searchWebLocal(query);
+	}
+	if (env.SEARXNG_QUERY_URL) {
+		return await searchSearxng(query);
 	}
 	if (env.SERPER_API_KEY) {
 		return await searchWebSerper(query);

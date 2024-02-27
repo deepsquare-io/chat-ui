@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { base } from "$app/paths";
+
 	import { page } from "$app/stores";
 	import { env } from "$env/dynamic/public";
 	import Logo from "$lib/components/icons/Logo.svelte";
 	import { isAborted } from "$lib/stores/isAborted";
 	import { switchTheme } from "$lib/switchTheme";
 	import type { ConvSidebar } from "$lib/types/ConvSidebar";
+	import type { Model } from "$lib/types/Model";
 	import type { LayoutData } from "../../routes/$types";
 	import NavConversationItem from "./NavConversationItem.svelte";
 
@@ -40,6 +42,8 @@
 		month: "This month",
 		older: "Older",
 	} as const;
+
+	const nModels: number = $page.data.models.filter((el: Model) => !el.unlisted).length;
 </script>
 
 <div class="sticky top-0 flex flex-none items-center justify-between px-3 py-3.5 max-sm:pt-0">
@@ -107,6 +111,18 @@
 	>
 		Theme
 	</button>
+	{#if nModels > 1}
+		<a
+			href="{base}/models"
+			class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+		>
+			Models
+			<span
+				class="ml-auto rounded-full border border-gray-300 px-2 py-0.5 text-xs text-gray-500 dark:border-gray-500 dark:text-gray-400"
+				>{nModels}</span
+			>
+		</a>
+	{/if}
 	{#if $page.data.enableAssistants}
 		<a
 			href="{base}/assistants"

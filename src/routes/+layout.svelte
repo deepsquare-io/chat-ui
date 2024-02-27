@@ -111,8 +111,14 @@
 		if ($settings.activeModel === $page.url.searchParams.get("model")) {
 			goto(`${base}/?`);
 		}
-		$settings.activeModel = $page.url.searchParams.get("model") ?? $settings.activeModel;
+		settings.instantSet({
+			activeModel: $page.url.searchParams.get("model") ?? $settings.activeModel,
+		});
 	}
+
+	$: mobileNavTitle = ["/models", "/assistants", "/privacy"].includes($page.route.id ?? "")
+		? ""
+		: data.conversations.find((conv) => conv.id === $page.params.id)?.title;
 </script>
 
 <svelte:head>
@@ -152,7 +158,7 @@
 		href="{env.PUBLIC_ORIGIN || $page.url.origin}{base}/{env.PUBLIC_APP_ASSETS}/manifest.json"
 	/>
 
-	{#if env.PUBLIC_PLAUSIBLE_SCRIPT_URL}
+	{#if env.PUBLIC_PLAUSIBLE_SCRIPT_URL && env.PUBLIC_ORIGIN}
 		<script
 			defer
 			data-domain={new URL(env.PUBLIC_ORIGIN).hostname}
@@ -161,18 +167,14 @@
 	{/if}
 </svelte:head>
 
-{#if !$settings.ethicsModalAccepted && $page.url.pathname !== "/privacy"}
+{#if !$settings.ethicsModalAccepted && $page.url.pathname !== `${base}/privacy`}
 	<DisclaimerModal />
 {/if}
 
 <div
 	class="grid h-full w-screen grid-cols-1 grid-rows-[auto,1fr] overflow-hidden text-smd md:grid-cols-[280px,1fr] md:grid-rows-[1fr] dark:text-gray-300"
 >
-	<MobileNav
-		isOpen={isNavOpen}
-		on:toggle={(ev) => (isNavOpen = ev.detail)}
-		title={data.conversations.find((conv) => conv.id === $page.params.id)?.title}
-	>
+	<MobileNav isOpen={isNavOpen} on:toggle={(ev) => (isNavOpen = ev.detail)} title={mobileNavTitle}>
 		<NavMenu
 			conversations={data.conversations}
 			user={data.user}

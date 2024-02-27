@@ -25,6 +25,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 		});
 	}
 
+	if (event.url.pathname.startsWith(`${base}/admin/`) || event.url.pathname === `${base}/admin`) {
+		const ADMIN_SECRET = env.ADMIN_API_SECRET || env.PARQUET_EXPORT_SECRET;
+
+		if (!ADMIN_SECRET) {
+			return errorResponse(500, "Admin API is not configured");
+		}
+
+		if (event.request.headers.get("Authorization") !== `Bearer ${ADMIN_SECRET}`) {
+			return errorResponse(401, "Unauthorized");
+		}
+	}
+
 	const token = event.cookies.get(env.COOKIE_NAME);
 
 	let secretSessionId: string;

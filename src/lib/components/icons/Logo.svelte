@@ -20,9 +20,9 @@
 		/>
 	</svg>
 {:else}
-	<object
+	<img
 		class={classNames}
-		data="{env.PUBLIC_ORIGIN || $page.url.origin}{base}/{env.PUBLIC_APP_ASSETS}/logo.svg"
-		title="{env.PUBLIC_APP_NAME} logo"
+		alt="{env.PUBLIC_APP_NAME} logo"
+		src="{env.PUBLIC_ORIGIN || $page.url.origin}{base}/{env.PUBLIC_APP_ASSETS}/logo.svg"
 	/>
 {/if}

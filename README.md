@@ -166,7 +166,7 @@ PUBLIC_APP_DISCLAIMER=
 
 You can enable the web search through an API by adding `YDC_API_KEY` ([docs.you.com](https://docs.you.com)) or `SERPER_API_KEY` ([serper.dev](https://serper.dev/)) or `SERPAPI_KEY` ([serpapi.com](https://serpapi.com/)) or `SERPSTACK_API_KEY` ([serpstack.com](https://serpstack.com/)) to your `.env.local`.
 
-You can also simply enable the local websearch by setting `USE_LOCAL_WEBSEARCH=true` in your `.env.local`.
+You can also simply enable the local google websearch by setting `USE_LOCAL_WEBSEARCH=true` in your `.env.local` or specify a SearXNG instance by adding the query URL to `SEARXNG_QUERY_URL`.
 
 ### Custom models
 
@@ -353,9 +353,12 @@ MODELS=`[{
   "endpoints": [
       {
           "type": "openai",
-          "baseURL": "https://gateway.example.com/v1",
+          "baseURL": "https://{resource-name}.openai.azure.com/openai/deployments/{deployment-id}",
           "defaultHeaders": {
-              "x-portkey-config": '{"provider":"azure-openai","resource_name":"abc-fr","deployment_id":"gpt-4-1106-preview","api_version":"2023-03-15-preview","api_key":"abc...xyz"}'
+              "api-key": "{api-key}"
+          },
+          "defaultQuery": {
+              "api-version": "2023-05-15"
           }
       }
   ]

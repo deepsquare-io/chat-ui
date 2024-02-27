@@ -37,26 +37,6 @@ export const load: LayoutServerLoad = async ({ locals, depends }) => {
 		});
 	}
 
-	// get the number of messages where `from === "assistant"` across all conversations.
-	const totalMessages =
-		(
-			await collections.conversations
-				.aggregate([
-					{ $match: authCondition(locals) },
-					{ $project: { messages: 1 } },
-					{ $unwind: "$messages" },
-					{ $match: { "messages.from": "assistant" } },
-					{ $count: "messages" },
-				])
-				.toArray()
-		)[0]?.messages ?? 0;
-
-	const messagesBeforeLogin = env.MESSAGES_BEFORE_LOGIN ? parseInt(env.MESSAGES_BEFORE_LOGIN) : 0;
-
-	const userHasExceededMessages = messagesBeforeLogin > 0 && totalMessages > messagesBeforeLogin;
-
-	const loginRequired = requiresUser && !locals.user && userHasExceededMessages;
-
 	const enableAssistants = env.ENABLE_ASSISTANTS === "true";
 
 	const assistantActive = !models.map(({ id }) => id).includes(settings?.activeModel ?? "");
@@ -84,13 +64,45 @@ export const load: LayoutServerLoad = async ({ locals, depends }) => {
 			createdAt: 1,
 			assistantId: 1,
 		})
+		.limit(300)
 		.toArray();
 
-	const assistantIds = conversations
-		.map((conv) => conv.assistantId)
-		.filter((el) => !!el) as ObjectId[];
+	const userAssistants = settings?.assistants?.map((assistantId) => assistantId.toString()) ?? [];
+	const userAssistantsSet = new Set(userAssistants);
+
+	const assistantIds = [
+		...userAssistants.map((el) => new ObjectId(el)),
+		...(conversations.map((conv) => conv.assistantId).filter((el) => !!el) as ObjectId[]),
+	];
 
 	const assistants = await collections.assistants.find({ _id: { $in: assistantIds } }).toArray();
+
+	const messagesBeforeLogin = env.MESSAGES_BEFORE_LOGIN ? parseInt(env.MESSAGES_BEFORE_LOGIN) : 0;
+
+	let loginRequired = false;
+
+	if (requiresUser && !locals.user && messagesBeforeLogin) {
+		if (conversations.length > messagesBeforeLogin) {
+			loginRequired = true;
+		} else {
+			// get the number of messages where `from === "assistant"` across all conversations.
+			const totalMessages =
+				(
+					await collections.conversations
+						.aggregate([
+							{ $match: { ...authCondition(locals), "messages.from": "assistant" } },
+							{ $project: { messages: 1 } },
+							{ $limit: messagesBeforeLogin + 1 },
+							{ $unwind: "$messages" },
+							{ $match: { "messages.from": "assistant" } },
+							{ $count: "messages" },
+						])
+						.toArray()
+				)[0]?.messages ?? 0;
+
+			loginRequired = totalMessages > messagesBeforeLogin;
+		}
+	}
 
 	return {
 		conversations: conversations.map((conv) => {
@@ -118,7 +130,8 @@ export const load: LayoutServerLoad = async ({ locals, depends }) => {
 				env.SERPER_API_KEY ||
 				env.SERPSTACK_API_KEY ||
 				env.YDC_API_KEY ||
-				env.USE_LOCAL_WEBSEARCH
+				env.USE_LOCAL_WEBSEARCH ||
+				env.SEARXNG_QUERY_URL
 			),
 			ethicsModalAccepted: !!settings?.ethicsModalAcceptedAt,
 			ethicsModalAcceptedAt: settings?.ethicsModalAcceptedAt ?? null,
@@ -128,7 +141,7 @@ export const load: LayoutServerLoad = async ({ locals, depends }) => {
 				settings?.shareConversationsWithModelAuthors ??
 				DEFAULT_SETTINGS.shareConversationsWithModelAuthors,
 			customPrompts: settings?.customPrompts ?? {},
-			assistants: settings?.assistants?.map((el) => el.toString()) ?? [],
+			assistants: userAssistants,
 		},
 		models: models.map((model) => ({
 			id: model.id,
@@ -139,6 +152,7 @@ export const load: LayoutServerLoad = async ({ locals, depends }) => {
 			datasetUrl: model.datasetUrl,
 			displayName: model.displayName,
 			description: model.description,
+			logoUrl: model.logoUrl,
 			promptExamples: model.promptExamples,
 			parameters: model.parameters,
 			preprompt: model.preprompt,
@@ -146,6 +160,15 @@ export const load: LayoutServerLoad = async ({ locals, depends }) => {
 			unlisted: model.unlisted,
 		})),
 		oldModels,
+		assistants: assistants
+			.filter((el) => userAssistantsSet.has(el._id.toString()))
+			.map((el) => ({
+				...el,
+				_id: el._id.toString(),
+				createdById: undefined,
+				createdByMe:
+					el.createdById.toString() === (locals.user?._id ?? locals.sessionId).toString(),
+			})),
 		user: locals.user && {
 			id: locals.user._id.toString(),
 			username: locals.user.username,
