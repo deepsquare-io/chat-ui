@@ -66,7 +66,7 @@ const modelConfig = z.object({
 	embeddingModel: validateEmbeddingModelByName(embeddingModels).optional(),
 });
 
-const modelsRaw = z.array(modelConfig).parse(JSON5.parse(env.MODELS));
+const modelsRaw = z.array(modelConfig).parse(JSON5.parse(env.MODELS || "[]"));
 
 const processModel = async (m: z.infer<typeof modelConfig>) => ({
 	...m,
@@ -136,7 +136,7 @@ export const oldModels = env.OLD_MODELS
 					displayName: z.string().min(1).optional(),
 				})
 			)
-			.parse(JSON5.parse(env.OLD_MODELS))
+			.parse(JSON5.parse(env.OLD_MODELS || "[]"))
 			.map((m) => ({ ...m, id: m.id || m.name, displayName: m.displayName || m.name }))
 	: [];
 

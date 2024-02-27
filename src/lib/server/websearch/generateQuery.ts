@@ -7,8 +7,8 @@ import { generateFromDefaultEndpoint } from "../generateFromDefaultEndpoint";
 
 const listSchema = z.array(z.string()).default([]);
 
-const allowList = listSchema.parse(JSON5.parse(env.WEBSEARCH_ALLOWLIST));
-const blockList = listSchema.parse(JSON5.parse(env.WEBSEARCH_BLOCKLIST));
+const allowList = listSchema.parse(JSON5.parse(env.WEBSEARCH_ALLOWLIST || "[]"));
+const blockList = listSchema.parse(JSON5.parse(env.WEBSEARCH_BLOCKLIST || "[]"));
 
 const queryModifier = [
 	...allowList.map((item) => "site:" + item),
